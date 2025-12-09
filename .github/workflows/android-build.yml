@@ -40,13 +40,13 @@ jobs:
         run: cd android && ./gradlew assembleRelease
 
       - name: Upload AAB artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: App-AAB
           path: android/app/build/outputs/bundle/release/*.aab
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: App-APK
           path: android/app/build/outputs/apk/release/*.apk
