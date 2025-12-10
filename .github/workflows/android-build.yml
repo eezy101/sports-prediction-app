@@ -5,8 +5,6 @@
   run: |
     echo ${{ secrets.KEYSTORE_BASE64 }} | base64 --decode > android/app/release-keystore.jks
 
-name: Android CI - Build Signed APK & AAB
-
 on:
   push:
     branches: [ "main" ]
