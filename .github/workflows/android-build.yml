@@ -1,18 +1,17 @@
+name: Android CI - Build APK & AAB
+
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
-env:
-  JAVA_HOME: /usr/lib/jvm/adoptopenjdk-17-hotspot
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
+      # 1️⃣ Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -36,36 +35,23 @@ jobs:
 
       # 4️⃣ Make gradlew executable
       - name: Make gradlew executable
-        run: |
-          cd android
-          chmod +x gradlew
+        run: chmod +x ./android/gradlew
 
-      # 5️⃣ Create keystore file from GitHub Secret
-      - name: Create keystore file
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          mkdir -p android/app
-          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release-keystore.jks
+      # 5️⃣ Ensure android/app folder exists
+      - name: Create android/app folder
+        run: mkdir -p android/app
 
-      # 6️⃣ Add signing info to gradle.properties
-      - name: Add signing info
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          echo "RELEASE_STORE_PASSWORD=$KEYSTORE_PASSWORD" >> android/gradle.properties
-          echo "RELEASE_KEY_ALIAS=$KEY_ALIAS" >> android/gradle.properties
-          echo "RELEASE_KEY_PASSWORD=$KEY_PASSWORD" >> android/gradle.properties
+      # 6️⃣ Decode keystore from GitHub secret
+      - name: Decode release keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-keystore.jks
 
       # 7️⃣ Build Release AAB
       - name: Build Release AAB
-        run: cd android && ./gradlew bundleRelease --no-daemon --stacktrace
+        run: cd android && ./gradlew bundleRelease
 
       # 8️⃣ Build Release APK
       - name: Build Release APK
-        run: cd android && ./gradlew assembleRelease --no-daemon --stacktrace
+        run: cd android && ./gradlew assembleRelease
 
       # 9️⃣ Upload AAB artifact
       - name: Upload AAB artifact
