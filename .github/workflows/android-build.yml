@@ -1,6 +1,5 @@
 name: Android CI - Build APK & AAB
 
-# Trigger on push or PR to main branch
 on:
   push:
     branches: ["main"]
@@ -12,28 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository
+      # 1️⃣ Checkout your repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Set up Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      # 3. Install NPM dependencies
-      - name: Install Node.js dependencies
-        run: npm install
-
-      # 4. Set up JDK 17
+      # 2️⃣ Set up Java JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # 5. Cache Gradle dependencies
+      # 3️⃣ Cache Gradle dependencies to speed up builds
       - name: Cache Gradle
         uses: actions/cache@v3
         with:
@@ -44,39 +33,39 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 6. Make gradlew executable
+      # 4️⃣ Make gradlew executable (fixes chmod errors)
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      # 7. Set up keystore (base64 secret in repo)
-      - name: Setup Android Keystore
-        run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 --decode > android/app/release-keystore.jks
-          echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> android/gradle.properties
-          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/gradle.properties
-          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/gradle.properties
-          echo "storeFile=release-keystore.jks" >> android/gradle.properties
+      # 5️⃣ Install Node.js (latest LTS)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-      # 8. Build release AAB
+      # 6️⃣ Install npm dependencies
+      - name: Install npm dependencies
+        run: npm install
+
+      # 7️⃣ Build Release AAB
       - name: Build Release AAB
         run: cd android && ./gradlew bundleRelease
 
-      # 9. Build release APK
+      # 8️⃣ Build Release APK
       - name: Build Release APK
         run: cd android && ./gradlew assembleRelease
 
-      # 10. Upload AAB artifact
+      # 9️⃣ Upload AAB artifact
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: App-AAB
           path: android/app/build/outputs/bundle/release/*.aab
 
-      # 11. Upload APK artifact
+      # 🔟 Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: App-APK
           path: android/app/build/outputs/apk/release/*.apk
-
-          path: android/app/build/outputs/apk/release/*.apk
+/outputs/apk/release/*.apk
